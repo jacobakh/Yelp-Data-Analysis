@@ -1,0 +1,91 @@
+---
+title: "Final Project"
+author: "Yakub Akhmerov"
+date: "April 25, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lubridate)
+```
+
+# Load data
+```{r}
+review_train <- read.csv("~/Downloads/yelp_academic_dataset_review_train.csv") #reviews
+review_test <- read.csv("~/Downloads/yelp_academic_dataset_review_test.csv") #reviews
+business_train <- read.csv("~/Downloads/yelp_academic_dataset_business_train.csv") #business
+business_test <- read.csv("~/Downloads/yelp_academic_dataset_business_test.csv") #business
+user <- read.csv("~/Downloads/yelp_academic_dataset_user.csv") #user description and identity 
+tips <- read.csv("~/Downloads/yelp_academic_dataset_tip.csv")
+checkin <- read.csv("~/Downloads/yelp_academic_dataset_checkin.csv")
+```
+
+# Datamonkeying on Business Training Set
+```{r}
+feats_out1 <- c(2, 6, 9, 11, 16, 17)
+business_train.clean <- business_train[,-feats_out1]
+business_train.clean$state <- as.factor(business_train.clean$state)
+business_train.clean$business_id <- as.factor(business_train.clean$business_id)
+
+library(ade4)
+library(data.table)
+
+feats1 = c(4, 7, 8) #change this for testing as the index might be different
+  for (f in feats1){
+  df_all_dummy = acm.disjonctif(business_train[f])
+  business_train.clean[f] = NULL
+  business_train.clean = cbind(business_train.clean, df_all_dummy)
+  }
+write.csv(business_train.clean, file = "Business Train1.csv")
+```
+
+```{r}
+feats_out2 <- c(3, 7, 10, 12, 16, 17)
+business_test.clean <- business_test[,-feats_out2]
+business_test.clean$state <- as.factor(business_test.clean$state)
+business_test.clean$business_id <- as.factor(business_test.clean$business_id)
+
+library(ade4)
+library(data.table)
+
+feats2 = c(5, 8, 9) #change this for testing as the index might be different
+  for (f in feats2){
+  df_all_dummy = acm.disjonctif(business_test[f])
+  business_test.clean[f] = NULL
+  business_test.clean = cbind(business_test.clean, df_all_dummy)
+  }
+write.csv(business_test.clean, file = "Business Test1.csv")
+
+```
+
+
+# EDA
+```{r}
+training <- readRDS("~/Downloads/training_set.RDS")
+testing <- readRDS("~/Downloads/testing_set.RDS")
+
+num.class <- 2
+param <- list("objective" = "multi:softprob",    # multiclass classification 
+              "num_class" = 10,    # number of classes 
+              "eval_metric" = "merror",    # evaluation metric 
+              "nthread" = 8,   # number of threads to be used 
+              "max_depth" = 16,    # maximum depth of tree 
+              "eta" = 0.3,    # step size shrinkage 
+              "gamma" = 0,    # minimum loss reduction 
+              "subsample" = 1,    # part of data instances to grow tree 
+              "colsample_bytree" = 1,  # subsample ratio of columns when constructing each tree 
+              "min_child_weight" = 12  # minimum sum of instance weight needed in a child 
+)
+
+y <- training$y.stars
+
+training.matrix <- data.matrix(training)
+
+nround.cv <- 50
+
+system.time( bst.cv <- xgb.cv(param=param, data=training.matrix, label=y, 
+                              nfold=4, nrounds=nround.cv, prediction=TRUE, verbose=T) )
+
+
+```

@@ -1,0 +1,46 @@
+---
+title: "Final Project"
+author: "Yakub Akhmerov"
+date: "April 25, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lubridate)
+```
+
+# Load data
+```{r}
+review_train <- read.csv("~/Downloads/yelp_academic_dataset_review_train.csv") #reviews
+review_test <- read.csv("~/Downloads/yelp_academic_dataset_review_test.csv") #reviews
+business_train <- read.csv("~/Downloads/yelp_academic_dataset_business_train.csv") #business
+business_test <- read.csv("~/Downloads/yelp_academic_dataset_business_test.csv") #business
+user <- read.csv("~/Downloads/yelp_academic_dataset_user.csv") #user description and identity 
+tips <- read.csv("~/Downloads/yelp_academic_dataset_tip.csv")
+checkin <- read.csv("~/Downloads/yelp_academic_dataset_checkin.csv")
+```
+
+
+states <- as.data.frame(business_train.clean$state)
+states <- terms(states)
+
+# Datamonkeying on Business Set
+```{r}
+feats_out <- c(2, 6, 9, 11, 16, 17)
+business_train.clean <- business_train[,-feats_out]
+business_train.clean$state <- as.factor(business_train.clean$state)
+business_train.clean$business_id <- as.factor(business_train.clean$business_id)
+
+library(ade4)
+library(data.table)
+
+feats = c(4, 7, 8) #change this for testing as the index might be different
+processesor <- function(x){
+  for (f in feats){
+  df_all_dummy = acm.disjonctif(business_train.clean[f])
+  business_train.clean[f] = NULL
+  business_train.clean = cbind(business_train.clean, df_all_dummy)
+  }
+}
+```
