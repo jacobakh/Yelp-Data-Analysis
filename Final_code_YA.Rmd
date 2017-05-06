@@ -1,0 +1,112 @@
+---
+title: "Final Project"
+author: "Yakub Akhmerov"
+date: "April 25, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lubridate)
+library(xgboost)
+```
+
+# Load data
+```{r}
+review_train <- read.csv("~/Downloads/yelp_academic_dataset_review_train.csv") #reviews
+review_test <- read.csv("~/Downloads/yelp_academic_dataset_review_test.csv") #reviews
+business_train <- read.csv("~/Downloads/yelp_academic_dataset_business_train.csv") #business
+business_test <- read.csv("~/Downloads/yelp_academic_dataset_business_test.csv") #business
+user <- read.csv("~/Downloads/yelp_academic_dataset_user.csv") #user description and identity 
+tips <- read.csv("~/Downloads/yelp_academic_dataset_tip.csv")
+checkin <- read.csv("~/Downloads/yelp_academic_dataset_checkin.csv")
+```
+
+# Datamonkeying on Business Training Set
+```{r}
+feats_out1 <- c(2, 6, 9, 11, 16, 17)
+business_train.clean <- business_train[,-feats_out1]
+business_train.clean$state <- as.factor(business_train.clean$state)
+business_train.clean$business_id <- as.factor(business_train.clean$business_id)
+
+library(ade4)
+library(data.table)
+
+feats1 = c(4, 7, 8) #change this for testing as the index might be different
+  for (f in feats1){
+  df_all_dummy = acm.disjonctif(business_train[f])
+  business_train.clean[f] = NULL
+  business_train.clean = cbind(business_train.clean, df_all_dummy)
+  }
+write.csv(business_train.clean, file = "Business Train1.csv")
+```
+
+```{r}
+feats_out2 <- c(3, 7, 10, 12, 16, 17)
+business_test.clean <- business_test[,-feats_out2]
+business_test.clean$state <- as.factor(business_test.clean$state)
+business_test.clean$business_id <- as.factor(business_test.clean$business_id)
+
+library(ade4)
+library(data.table)
+
+feats2 = c(5, 8, 9) #change this for testing as the index might be different
+  for (f in feats2){
+  df_all_dummy = acm.disjonctif(business_test[f])
+  business_test.clean[f] = NULL
+  business_test.clean = cbind(business_test.clean, df_all_dummy)
+  }
+write.csv(business_test.clean, file = "Business Test1.csv")
+
+```
+
+
+
+```{r}
+training.clean <- training %>%
+  select(-X, -postal_code, -`dinner: false`, - compliment_cool, -cool_user) %>%
+  na.omit()
+
+testing.clean <- testing %>% 
+  select(-X, -postal_code, -`dinner: false`, - compliment_cool, -cool_user, -names.w.missing.values)
+
+testing.w.missing.values <- testing[,sapply(testing,function(x) any(is.na(x)))]
+training.w.missing.values <- training[,sapply(training,function(x) any(is.na(x)))]
+
+names.w.missing.values <- names(testing.w.missing.values)
+names.w.missing.values <- as.vector(names.w.missing.values)
+names.w.missing.values.testing <- names(testing.w.missing.values)
+names.w.missing.values.training <- names(training.w.missing.values)
+
+
+save = colnames(testing)
+save = save[!save %in% names.w.missing.values.testing]
+cleantesting <- testing[,save]
+cleantraining <- training[,save]
+cleantraining1 <- cbind(y.stars, cleantraining)
+
+
+saveRDS(cleantraining1, "training_set44.RDS")
+saveRDS(cleantesting, "testing_set.RDS")
+
+(colnames(cleantesting) == colnames(cleantraining)) %>% all() #check colnames are equal!
+y.stars <- training$y.stars
+
+
+
+training.cnames = colnames(training.clean[,-1])  %>% order
+training.cnames
+
+
+training.clean2 <- training.clean %>% select(noquote(order(colnames(training.clean))))
+
+testing.clean2 <- testing.clean %>% select(noquote(order(colnames(testing.clean))))
+
+
+(colnames(training.clean2[,-289])== colnames(testing.clean2)) %>% all
+
+setwd("~/Documents/STAT 154/Final Project/")
+saveRDS(training.clean2, "training_set.RDS")
+saveRDS(testing.clean2, "testing_set.RDS")
+
+```
