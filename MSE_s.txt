@@ -1,0 +1,86 @@
+# > lasso.model
+# glmnet 
+# 
+# 2510 samples
+# 108 predictor
+# 
+# Pre-processing: centered (108), scaled (108) 
+# Resampling: Cross-Validated (10 fold) 
+# Summary of sample sizes: 2259, 2259, 2257, 2260, 2259, 2259, ... 
+# Resampling results:
+#   
+#   RMSE      Rsquared 
+# 0.493723  0.5890142
+# 
+# Tuning parameter 'alpha' was held constant at a value of 1
+# Tuning parameter 'lambda'
+# was held constant at a value of 0.05
+# 
+# > ridge.model
+# glmnet 
+# 
+# 2510 samples
+# 108 predictor
+# 
+# Pre-processing: centered (108), scaled (108) 
+# Resampling: Cross-Validated (10 fold) 
+# Summary of sample sizes: 2259, 2259, 2258, 2260, 2259, 2259, ... 
+# Resampling results:
+#   
+#   RMSE       Rsquared 
+# 0.4652794  0.6223548
+# 
+# Tuning parameter 'alpha' was held constant at a value of 0
+# Tuning parameter 'lambda'
+# was held constant at a value of 0.05
+
+# Principal Component Analysis 
+# 
+# 2510 samples
+# 108 predictor
+# 
+# Pre-processing: centered (108), scaled (108) 
+# Resampling: Cross-Validated (10 fold) 
+# Summary of sample sizes: 2258, 2258, 2259, 2259, 2259, 2260, ... 
+# Resampling results:
+#   
+#   RMSE       Rsquared  
+# 0.7536913  0.01394737
+# 
+# Tuning parameter 'ncomp' was held constant at a value of 3
+
+# Random Forest 
+# 
+# 2510 samples
+# 108 predictor
+# 9 classes: '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5' 
+# 
+# No pre-processing
+# Resampling: Cross-Validated (10 fold) 
+# Summary of sample sizes: 2260, 2257, 2263, 2259, 2258, 2258, ... 
+# Resampling results across tuning parameters:
+#   
+#   mtry  Accuracy   Kappa    
+# 2   0.3897537  0.2100029
+# 28   0.4478818  0.3001958
+# 55   0.4577699  0.3173587
+# 81   0.4510394  0.3102442
+# 108   0.4473752  0.3061882
+# 
+# Accuracy was used to select the optimal model using  the largest value.
+# The final value used for the model was mtry = 55.
+
+# Linear Regression 
+# 
+# 2510 samples
+# 108 predictor
+# 
+# Pre-processing: centered (108), scaled (108) 
+# Resampling: Bootstrapped (25 reps) 
+# Summary of sample sizes: 2510, 2510, 2510, 2510, 2510, 2510, ... 
+# Resampling results:
+#   
+#   RMSE       Rsquared 
+# 0.4773863  0.6059391
+# 
+# Tuning parameter 'intercept' was held constant at a value of TRUE
