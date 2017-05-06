@@ -1,0 +1,97 @@
+---
+title: "eda_final_proj"
+author: "Lydia Maher"
+date: "May 4, 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, echo = FALSE}
+library(scatterplot3d)
+library(factoextra)
+library(ggplot2)
+library(devtools)
+library(FactoMineR)
+```
+
+```{r, echo = FALSE}
+setwd("C:/Users/Lydia/Documents/UCBSpring2017/Stat154/final_proj/")
+testing_set <- readRDS('./data/testing_set.RDS')
+training_set <- readRDS('./data/training_set.RDS')
+```
+
+```{r, echo = FALSE}
+training_set_pca <- training_set[, -c(2)]
+pca.training <-prcomp(training_set_pca, center = TRUE, scale. = TRUE,retx=TRUE)
+screeplot(pca.training, type = 'l', main = "PCA Screeplot")
+#head(results.pca$eig, n =10)
+```
+Running PCA reveals that about 31% of the variance of this dataset can be explained with the first three principal components. Similarly, the first 10 component account for 51% of the variance.
+This means that not all of the variables are that predictive and our dataset is somewhat sparse. However, because 10 components still only account for about 50% of variance, this dataset might not be the best candidate for dimensionality reduction. 
+```{r, echo = FALSE}
+qplot(
+  x = as.vector(pca.training$x[,1]),
+  y = as.vector(pca.training$x[,2]),
+  color = as.factor(training_set_pca$y.stars),
+  ylab = 'Component 2', 
+  xlab = 'Component 1',
+  main = "Representation of Data in First Two PCs") +theme(plot.title = element_text(hjust = 0.5))
+```
+Plotting the two first principal components against one another reveals one concentrated cluster to the bottom right, with two sprawling streams of outliers to the right and left of this cluster. This suggests that there are a lot of fairly similar reviews, but that in the not-so-similar reviews, there is a lot of variance. Particularly for higher star ratings, there tends to be a lot of variation (we such much less 'pink' values in the center of the cluster and these colors correlate to star ratings of 4.5 and 5). This makes sense as we would expect businesses which are either really good or really bad to have quite different attributes -it wouldn't make sense if ALL restaurants described as 'fantastic' were also Mexican restaurants.
+```{r, eval = FALSE, echo = FALSE}
+plot(pca.training$rotation[,1], pca.training$rotation[,2], ylab = 'Component 2', xlab = 'Component 1',
+     main = "Variation of First Two PCs")
+```
+
+```{r, eval = FALSE, echo = FALSE}
+new_pca <- princomp(training_set_pca, scores = TRUE)
+plot(new_pca$scores[,1], new_pca$scores[,2], ylab = 'Component 2', xlab = 'Component 1',
+     main = "Representation of Dataset from First Two PCs")
+```
+
+```{r, echo = FALSE}
+scatterplot3d(as.vector(pca.training$x[,1]), as.vector(pca.training$x[,12]),
+            as.vector(pca.training$x[,3]), main="Representation of Dataset from First Three PCs", color = as.factor(training_set_pca$y.stars),
+            xlab = "Component 1", ylab = "Component 2", zlab = "Component 3")
+```
+As shown above, these clusters and streams of outliers still exist in a 3D scatterplot of the first three principal components.
+
+```{r, eval = FALSE, echo = FALSE}
+ggplot(data = as.data.frame(pca.training$rotation), aes(x = as.vector(pca.training$rotation[,1]), y = as.vector(pca.training$rotation[,2]))) 
++ geom_point()
+```
+
+```{r, echo = FALSE}
+results.pca <- PCA(training_set_pca, graph = FALSE)
+head(sort(results.pca$var$contrib[,1], decreasing = TRUE))
+```
+Next, we looked at what attributes most contribute to the variation in these components. The table above shows that restaurants which are *not* self-labelled or labelled by Yelp as romantic, intimate, upscale, touristy, classy or hipster lead to the most variation in reviews.
+
+```{r, echo = FALSE}
+head(sort(results.pca$var$contrib[,1]))
+```
+On the other hand, if restaurants are described as pretty, great, with "i love"/"more"/"out" or reviewed with similar amounts of stars, they tend to be more similar to each other (in other words, they account for less variation). 
+ 
+```{r, echo = FALSE}
+#make histogram
+#ggplot(training_set, aes(x =1, y = y.stars)) + geom_boxplot()
+qplot(training_set$y.stars, geom="bar", xlab = "stars", main = "Distribution of Star Ratings") + theme(plot.title = element_text(hjust = 0.5))
+```
+Finally, we briefly explored our response variable of star ratings across businesses. The star ratings have a mode of 3.5, with the majority of star ratings being between 3 and 4. Generally, the star ratings are skewed slightly towards the upper values of y. Looking at this same information in a boxplot, we can see that the whiskers do not extend below 1.5 stars. Moreover, reviews of 1 star are marked as outliers.
+
+```{r, eval = FALSE, echo = FALSE}
+setwd("C:/Users/Lydia/Documents/UCBSpring2017/Stat154/final_proj/")
+rf <-load("./RF.RData")
+lasso <-load("./LASSO.RData")
+ols <-load("./OLS.RData")
+pca <-load("./PCA.RData")
+ridge <-load("./Ridge.RData")
+```
+
+```{r, eval = FALSE, echo = FALSE}
+setwd("C:/Users/Lydia/Documents/UCBSpring2017/Stat154/final_proj/")
+#rf_df <- cbind(pred.rnames, rf.prediction)
+write.csv(rf.predict, file = "rf_predictions.csv")
+```
+
